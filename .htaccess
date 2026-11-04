@@ -1,0 +1,69 @@
+# ============================================================
+#  BiliShort — 路由与访问控制
+#  入口只有 /bilibili，根目录不暴露任何页面。
+# ============================================================
+
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+
+AddDefaultCharset UTF-8
+
+# ---------- 响应头：不泄露环境信息 ----------
+<IfModule mod_headers.c>
+    Header unset X-Powered-By
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set X-Frame-Options "DENY"
+    Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), interest-cohort=()"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; frame-src https://player.bilibili.com; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'"
+
+    # 静态资源长缓存（文件名固定，改动请改版本号或文件名）
+    <FilesMatch "\.(css|js|png|svg|ico|woff2)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+# ---------- PHP：不显示错误、不暴露版本 ----------
+<IfModule mod_php.c>
+    php_flag display_errors off
+    php_flag log_errors on
+    php_flag expose_php off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag display_errors off
+    php_flag log_errors on
+    php_flag expose_php off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag display_errors off
+    php_flag log_errors on
+    php_flag expose_php off
+</IfModule>
+
+# ---------- 内部文件：谁都别想直接访问 ----------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # RewriteBase /子目录/     # ← 放在子目录时改成实际值，并去掉行首 #
+
+    RewriteRule ^(?:config|lib|selfcheck)\.php$        - [F,L]
+    RewriteRule ^(?:views|tools|cache)(?:/|$)          - [F,L]
+    RewriteRule ^\.(?:htaccess|user\.ini|git.*|env.*)$ - [F,L]
+    RewriteRule ^(?:README.*\.md|LICENSE|composer\.(?:json|lock))$ - [F,L]
+
+    # 其余请求交给唯一入口
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>
+
+# ---------- 双保险：文件级拒绝（Apache 2.4 / 2.2 都认） ----------
+<FilesMatch "^(config|lib|selfcheck)\.php$|^\.htaccess$|^\.user\.ini$|^README.*\.md$|^LICENSE$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

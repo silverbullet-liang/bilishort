@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESC}}">
+<meta name="keywords" content="B站短链,bilibili短链,BV号转短链,av号转BV,B站视频分享链接,短码,播放器嵌入,bilibili short link,bv to short url,bilibili player embed">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="theme-color" content="#fb7299" media="(prefers-color-scheme:light)">
+<meta name="theme-color" content="#101114" media="(prefers-color-scheme:dark)">
+<meta name="referrer" content="no-referrer">
+<link rel="canonical" href="{{CANONICAL}}">
+<link rel="icon" type="image/svg+xml" href="{{BASE}}/assets/favicon.svg">
+<link rel="stylesheet" href="{{BASE}}/assets/app.css">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{SITE_NAME}}">
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESC}}">
+<meta property="og:url" content="{{CANONICAL}}">
+<meta property="og:image" content="{{OG_IMAGE}}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{TITLE}}">
+<meta name="twitter:description" content="{{DESC}}">
+<meta name="twitter:image" content="{{OG_IMAGE}}">
+<script type="application/ld+json">{{JSONLD_1}}</script>
+<script type="application/ld+json">{{JSONLD_2}}</script>
+</head>
+<body>
+<main>
+
+  <header class="hero">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="mark"><path d="M6 4l3 3"/><path d="M18 4l-3 3"/><rect x="2.5" y="7" width="19" height="13" rx="4"/><path d="M9 12.5v3M15 12.5v3"/></svg>
+      <span>{{SITE_EN}}</span>
+    </div>
+    <h1>{{SITE_NAME}}</h1>
+    <p class="lead">{{TAGLINE}}</p>
+    <p class="lead-sub">Short link for any bilibili video — no account, no database, no tracking.</p>
+  </header>
+
+  <section class="card" aria-labelledby="form-title">
+    <h2 id="form-title" class="sr">转换</h2>
+    <label for="q">BV 号 / av 号 / 视频链接 / 短码 / 分享文案</label>
+    <form class="field" id="form" autocomplete="off">
+      <input id="q" name="q" type="text" inputmode="text" spellcheck="false"
+             autocapitalize="off" autocorrect="off" enterkeyhint="go"
+             placeholder="BV1es411D7sW 或 https://b23.tv/xxxxxxx">
+      <button id="go" type="submit" class="btn">
+        <span class="btn-text">转换</span>
+        <svg class="btn-spin" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" /></svg>
+      </button>
+    </form>
+
+    <div class="chips" role="group" aria-label="示例">
+      <button type="button" class="chip" data-fill="BV1es411D7sW">BV 号</button>
+      <button type="button" class="chip" data-fill="av2271112">av 号</button>
+      <button type="button" class="chip" data-fill="https://www.bilibili.com/video/BV1es411D7sW">视频链接</button>
+      <button type="button" class="chip" data-fill="44X4XM444">短码</button>
+    </div>
+
+    <p id="msg" class="msg" role="status" aria-live="polite"></p>
+
+    <div id="out" class="out" hidden>
+      <div class="row">
+        <span class="k">短码</span>
+        <code id="r-code"></code>
+        <button type="button" class="copy" data-copy="r-code" aria-label="复制短码">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="2"/><path d="M10.5 3.5H4a1.5 1.5 0 00-1.5 1.5v6.5"/></svg>
+        </button>
+      </div>
+      <div class="row">
+        <span class="k">短链</span>
+        <a id="r-url" href="#" target="_blank" rel="noopener noreferrer"></a>
+        <button type="button" class="copy" data-copy="r-url" aria-label="复制短链">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="2"/><path d="M10.5 3.5H4a1.5 1.5 0 00-1.5 1.5v6.5"/></svg>
+        </button>
+      </div>
+      <div class="row">
+        <span class="k">播放器</span>
+        <a id="r-player" href="#" target="_blank" rel="noopener noreferrer"></a>
+        <button type="button" class="copy" data-copy="r-player" aria-label="复制播放器地址">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="2"/><path d="M10.5 3.5H4a1.5 1.5 0 00-1.5 1.5v6.5"/></svg>
+        </button>
+      </div>
+      <div class="row row-code">
+        <span class="k">嵌入</span>
+        <code id="r-embed"></code>
+        <button type="button" class="copy" data-copy="r-embed" aria-label="复制嵌入代码">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="2"/><path d="M10.5 3.5H4a1.5 1.5 0 00-1.5 1.5v6.5"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title">Q&amp;A</h2>
+    {{FAQ}}
+  </section>
+
+  <footer>
+    <p>不记录、不统计、不放 Cookie。算法在服务端，跳转目标永远是 B 站播放器。</p>
+    <p class="foot-links">
+      <a href="https://github.com/silverbullet-liang/bilishort" rel="noopener noreferrer" target="_blank">开源（MIT）</a>
+      <span aria-hidden="true">·</span>
+      <a href="https://player.bilibili.com/" rel="noopener noreferrer" target="_blank">B 站播放器</a>
+    </p>
+    <p class="muted">© {{YEAR}} {{SITE_EN}}</p>
+  </footer>
+
+</main>
+<script src="{{BASE}}/assets/app.js" defer></script>
+</body>
+</html>

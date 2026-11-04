@@ -1,0 +1,11 @@
+# 运行时缓存
+cache/*.json
+cache/rl_*
+cache/b23_*
+# 本地调试
+_router.php
+*.zip
+*.log
+.DS_Store
+__pycache__/
+*.pyc
