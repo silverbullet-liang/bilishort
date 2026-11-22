@@ -11,6 +11,8 @@
   var timer = null;
 
   var fields = {
+    bv:     document.getElementById('r-bv'),
+    av:     document.getElementById('r-av'),
     code:   document.getElementById('r-code'),
     url:    document.getElementById('r-url'),
     player: document.getElementById('r-player'),
@@ -60,6 +62,8 @@
         say(j.error || '转换失败', true);
         return;
       }
+      fields.bv.textContent = j.bv;
+      fields.av.textContent = j.av === null ? '-' : 'av' + j.av;
       fields.code.textContent = j.code;
       fields.url.textContent = j.url;
       fields.url.href = j.url;

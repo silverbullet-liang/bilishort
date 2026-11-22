@@ -12,7 +12,7 @@
 - **短码跳转**：`/<短码>` 直接 302 到 B 站播放器，可嵌入 iframe
 - **路径直跳**：`/BV1es411D7sW`、`/av2271112` 同样有效
 - **参数透传**：`p` / `t` / `danmaku` / `autoplay` / `high_quality` / `as_wide` 会带到播放器，其余参数一律丢弃
-- **固定彩蛋**：`/1`、`/114514`、`/8848`、`/xiaomi`、`/redmi`、`/huawei`、`/deepseek`；`/google` 跳某账号最新投稿
+- **固定彩蛋**：`/114514`、`/8848`、`/xiaomi`、`/redmi`、`/huawei`、`/deepseek`；`/google` 跳某账号最新投稿
 - **零状态**：无账号、无数据库、无统计、无 Cookie
 
 ## 部署
@@ -62,6 +62,7 @@ location / { try_files $uri /index.php?$query_string; }
 ```json
 {"ok":true,"bv":"BV1es411D7sW","av":2271112,"code":"44X4XM444",
  "url":"https://example.com/44X4XM444",
+ "page":"https://www.bilibili.com/video/BV1es411D7sW",
  "player":"https://player.bilibili.com/player.html?bvid=BV1es411D7sW",
  "embed":"<iframe …></iframe>"}
 ```
@@ -74,6 +75,8 @@ av   → 61 进制定长 9 位 → 位置置乱 → 字符表替换 → 短码
 ```
 
 `61^9 ≈ 1.17e16`，覆盖 B 站 avid 上限 `2^51`。同一条视频在任何设备、任何时候算出的短码都一样。
+
+短码优先于裸数字解析：小 avid 的短码前若干位恒为 `4`，必然是纯数字，所以 9 位纯数字一律先按短码试解；输入 9 位的 avid 请写成 `av<数字>`。
 
 **不要改** `ID_MAP`、`SHUFFLE`、`BV_ALPHABET` 等常量，否则已发出的短码全部失效。改动前先跑：
 

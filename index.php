@@ -103,21 +103,25 @@ if (is_valid_bv($path)) {
     redirect_to_player($path, $params);
 }
 
-if (preg_match('/^(?:av)?(\d{1,16})$/i', $path, $m)) {
+/* ---------- 5) 短码（必须先于纯数字：短码可能全是数字） ---------- */
+
+if (strlen($path) === CODE_LEN) {
+    $bv = shortcode_to_bv($path);
+    if ($bv !== null) {
+        redirect_to_player($bv, $params);
+    }
+}
+
+/* ---------- 6) 路径上的 av 号 ---------- */
+
+if (preg_match('/^a?(?:v|id)?(\d{1,16})$/i', $path, $m)) {
     $bv = av_to_bv((int)$m[1]);
     if ($bv !== null) {
         redirect_to_player($bv, $params);
     }
 }
 
-/* ---------- 5) 短码 ---------- */
-
-$bv = shortcode_to_bv($path);
-if ($bv !== null) {
-    redirect_to_player($bv, $params);
-}
-
-/* ---------- 6) 其余 404 ---------- */
+/* ---------- 7) 其余 404 ---------- */
 
 not_found();
 
@@ -147,6 +151,7 @@ function convert_api(): void
         'av'     => bv_to_av($bv),
         'code'   => $code,
         'url'    => site_url('/' . $code),
+        'page'   => 'https://www.bilibili.com/video/' . $bv,
         'player' => player_url($bv, $params),
         'embed'  => player_embed($bv, $params),
     ]);
@@ -228,15 +233,25 @@ function render_tool_page(): void
         'offers'              => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'CNY'],
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
+    /* 静态资源指纹：文件一改，URL 自动变，避免被浏览器长缓存钉死 */
+    $assetV = 0;
+    foreach (['assets/app.css', 'assets/app.js', 'assets/favicon.svg', 'assets/og.png'] as $f) {
+        $p = __DIR__ . '/' . $f;
+        if (is_file($p)) {
+            $assetV = max($assetV, (int)filemtime($p));
+        }
+    }
+
     $map = [
         '{{LANG}}'      => 'zh-CN',
+        '{{ASSET_V}}'   => (string)($assetV ?: 1),
         '{{BASE}}'      => base_path(),
         '{{SITE_NAME}}' => SITE_NAME_ZH,
         '{{SITE_EN}}'   => SITE_NAME_EN,
         '{{TITLE}}'     => SITE_NAME_ZH . ' · BV 号转短链 / ' . SITE_NAME_EN,
         '{{DESC}}'      => $desc,
         '{{CANONICAL}}' => $canonical,
-        '{{OG_IMAGE}}'  => site_url('/assets/og.png'),
+        '{{OG_IMAGE}}'  => site_url('/assets/og.png') . '?v=' . ($assetV ?: 1),
         '{{TAGLINE}}'   => SITE_TAGLINE_ZH,
         '{{FAQ}}'       => faq_html(),
         '{{JSONLD_1}}'  => $app,
@@ -245,7 +260,7 @@ function render_tool_page(): void
     ];
 
     header('Content-Type: text/html; charset=utf-8');
-    header('Cache-Control: public, max-age=600');
+    header('Cache-Control: no-cache, must-revalidate');
     header('X-Robots-Tag: index, follow');
     echo strtr((string)file_get_contents($tpl), $map);
 }

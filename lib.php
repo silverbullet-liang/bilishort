@@ -230,18 +230,8 @@ function not_found(bool $asJson = false): void
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-store');
     header('X-Robots-Tag: noindex');
-    $home = base_path() . '/';
-    echo '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">'
-        . '<meta name="viewport" content="width=device-width,initial-scale=1">'
-        . '<meta name="robots" content="noindex">'
-        . '<title>404 — ' . SITE_NAME_ZH . '</title>'
-        . '<link rel="stylesheet" href="' . $home . 'assets/app.css">'
-        . '<link rel="icon" href="' . $home . 'assets/favicon.svg" type="image/svg+xml">'
-        . '</head><body class="page-narrow"><main>'
-        . '<p class="code">404</p><h1>这个地址没有对应的视频</h1>'
-        . '<p class="muted">短码可能被改过大小写，也可能视频已经删除或转为私密。</p>'
-        . '<p><a class="btn" href="' . $home . '">回到转换页</a></p>'
-        . '</main></body></html>';
+    echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>404 Not Found</title></head>'
+        . '<body><h1>404 Not found</h1></body></html>';
     exit;
 }
 
@@ -332,12 +322,14 @@ function normalize_to_bv(string $q): ?string
         return is_valid_bv($bv) ? $bv : null;
     }
 
-    /* 3) av 号 / 纯数字 */
-    if (preg_match('/^(?:av)?(\d{1,16})$/i', $q, $m)) {
+    /* 3) 带 av 前缀的号：av2271112 / AV 2271112 / aid=2271112 / a2271112 */
+    if (preg_match('/^a(?:v|id)?[\s:=_\-]*(\d{1,16})$/i', $q, $m)) {
         return av_to_bv((int)$m[1]);
     }
 
-    /* 4) 本站短码 */
+    /* 4) 本站短码：必须排在裸数字之前。
+       小 avid 的短码前若干位恒为 '4'（ID_MAP[0]），9 位纯数字几乎必然同时像 avid，
+       若先按数字解析，短码会被当成一个毫不相干的 av 号。 */
     if (strlen($q) === CODE_LEN) {
         $bv = shortcode_to_bv($q);
         if ($bv !== null) {
@@ -345,7 +337,12 @@ function normalize_to_bv(string $q): ?string
         }
     }
 
-    /* 5) 文案里没链接，但写了 BV 号 */
+    /* 5) 裸数字 → avid（9 位以下不会与短码撞车；9 位请写 av 前缀） */
+    if (preg_match('/^(\d{1,16})$/', $q, $m)) {
+        return av_to_bv((int)$m[1]);
+    }
+
+    /* 6) 文案里没链接，但写了 BV 号 */
     if (preg_match('/(BV[0-9A-Za-z]{10})/', $q, $m) && is_valid_bv($m[1])) {
         return $m[1];
     }
@@ -358,11 +355,17 @@ function normalize_to_bv(string $q): ?string
  * 出站 GET。返回 ['code'=>int,'body'=>string,'final'=>string,'location'=>string]
  * $follow 为 true 时最多跟随 3 跳，final 是有效地址。
  */
-function http_request(string $url, bool $follow = false): ?array
+function http_request(string $url, bool $follow = false, array $extraHeaders = []): ?array
 {
     if (!function_exists('curl_init')) {
         return null;
     }
+    $headers = [];
+    $sent = array_merge([
+        'Referer: https://www.bilibili.com/',
+        'Accept: application/json, text/html;q=0.9,*/*;q=0.8',
+    ], $extraHeaders);
+
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -374,10 +377,11 @@ function http_request(string $url, bool $follow = false): ?array
         CURLOPT_SSL_VERIFYHOST => 2,
         CURLOPT_ENCODING       => '',
         CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
-        CURLOPT_HTTPHEADER     => [
-            'Referer: https://www.bilibili.com/',
-            'Accept: application/json, text/html;q=0.9,*/*;q=0.8',
-        ],
+        CURLOPT_HTTPHEADER     => $sent,
+        CURLOPT_HEADERFUNCTION => static function ($ch, string $line) use (&$headers): int {
+            $headers[] = trim($line);
+            return strlen($line);
+        },
     ]);
     $body = curl_exec($ch);
     $code = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
@@ -387,7 +391,8 @@ function http_request(string $url, bool $follow = false): ?array
     if ($body === false) {
         return null;
     }
-    return ['code' => $code, 'body' => (string)$body, 'final' => $final, 'location' => $loc];
+    return ['code' => $code, 'body' => (string)$body, 'final' => $final,
+            'location' => $loc, 'headers' => $headers];
 }
 
 function cache_read(string $file, int $ttl): ?array

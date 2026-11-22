@@ -57,7 +57,6 @@ const BV_ALPHABET = 'FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf'
 /* ---------------- 固定彩蛋 ---------------- */
 
 const EGG_MAP = [
-    '1'        => 'BV1xx411c7mD',
     '114514'   => 'BV1yH4y1E7wp',
     '8848'     => 'BV1m2CZBEEa1',
     'xiaomi'   => 'BV1es411D7sW',

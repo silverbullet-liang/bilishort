@@ -12,7 +12,7 @@ The UI lives only at `/bilibili`; the site root returns 404 on purpose, so a ran
 - **Short code redirect**: `/<code>` → 302 to the bilibili player, embeddable in an iframe
 - **Direct paths**: `/BV1es411D7sW` and `/av2271112` work as well
 - **Parameter passthrough**: `p`, `t`, `danmaku`, `autoplay`, `high_quality`, `as_wide` are forwarded; everything else is dropped
-- **Easter eggs**: `/1`, `/114514`, `/8848`, `/xiaomi`, `/redmi`, `/huawei`, `/deepseek`; `/google` jumps to an account's newest upload
+- **Easter eggs**: `/114514`, `/8848`, `/xiaomi`, `/redmi`, `/huawei`, `/deepseek`; `/google` jumps to an account's newest upload
 - **Stateless**: no accounts, no database, no analytics, no cookies
 
 ## Deploy
@@ -62,6 +62,7 @@ API response:
 ```json
 {"ok":true,"bv":"BV1es411D7sW","av":2271112,"code":"44X4XM444",
  "url":"https://example.com/44X4XM444",
+ "page":"https://www.bilibili.com/video/BV1es411D7sW",
  "player":"https://player.bilibili.com/player.html?bvid=BV1es411D7sW",
  "embed":"<iframe …></iframe>"}
 ```
@@ -74,6 +75,8 @@ code → table lookup → inverse shuffle → base 61 decode → av → BV
 ```
 
 `61^9 ≈ 1.17e16` covers bilibili's `2^51` avid ceiling. The same video always yields the same code, on any device, at any time.
+
+Short codes take precedence over bare digits: a small avid always produces a code whose leading characters are `4`, so a 9-digit pure-number input is always tried as a code first. To enter a 9-digit avid, write `av<number>`.
 
 Do **not** edit `ID_MAP`, `SHUFFLE`, `BV_ALPHABET` or related constants — every code already handed out would break. Before touching the algorithm:
 

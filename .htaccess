@@ -18,9 +18,10 @@ AddDefaultCharset UTF-8
     Header always set Cross-Origin-Opener-Policy "same-origin"
     Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; frame-src https://player.bilibili.com; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'"
 
-    # 静态资源长缓存（文件名固定，改动请改版本号或文件名）
+    # 静态资源：URL 带 mtime 指纹（?v=），可以放心长缓存；
+    # 不用 immutable，避免覆盖文件后浏览器永不重新验证。
     <FilesMatch "\.(css|js|png|svg|ico|woff2)$">
-        Header set Cache-Control "public, max-age=31536000, immutable"
+        Header set Cache-Control "public, max-age=604800, must-revalidate"
     </FilesMatch>
 </IfModule>
 
@@ -40,6 +41,9 @@ AddDefaultCharset UTF-8
     php_flag log_errors on
     php_flag expose_php off
 </IfModule>
+
+# ---------- 统一 404：静态文件缺失也走极简页，不暴露服务器默认页 ----------
+ErrorDocument 404 /index.php
 
 # ---------- 内部文件：谁都别想直接访问 ----------
 <IfModule mod_rewrite.c>

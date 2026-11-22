@@ -11,8 +11,8 @@
 <meta name="theme-color" content="#101114" media="(prefers-color-scheme:dark)">
 <meta name="referrer" content="no-referrer">
 <link rel="canonical" href="{{CANONICAL}}">
-<link rel="icon" type="image/svg+xml" href="{{BASE}}/assets/favicon.svg">
-<link rel="stylesheet" href="{{BASE}}/assets/app.css">
+<link rel="icon" type="image/svg+xml" href="{{BASE}}/assets/favicon.svg?v={{ASSET_V}}">
+<link rel="stylesheet" href="{{BASE}}/assets/app.css?v={{ASSET_V}}">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{{SITE_NAME}}">
@@ -68,6 +68,20 @@
 
     <div id="out" class="out" hidden>
       <div class="row">
+        <span class="k">BV 号</span>
+        <code id="r-bv"></code>
+        <button type="button" class="copy" data-copy="r-bv" aria-label="复制 BV 号">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="2"/><path d="M10.5 3.5H4a1.5 1.5 0 00-1.5 1.5v6.5"/></svg>
+        </button>
+      </div>
+      <div class="row">
+        <span class="k">av 号</span>
+        <code id="r-av"></code>
+        <button type="button" class="copy" data-copy="r-av" aria-label="复制 av 号">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="2"/><path d="M10.5 3.5H4a1.5 1.5 0 00-1.5 1.5v6.5"/></svg>
+        </button>
+      </div>
+      <div class="row">
         <span class="k">短码</span>
         <code id="r-code"></code>
         <button type="button" class="copy" data-copy="r-code" aria-label="复制短码">
@@ -114,6 +128,6 @@
   </footer>
 
 </main>
-<script src="{{BASE}}/assets/app.js" defer></script>
+<script src="{{BASE}}/assets/app.js?v={{ASSET_V}}" defer></script>
 </body>
 </html>
